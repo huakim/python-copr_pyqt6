@@ -1,14 +1,27 @@
-from PySide6 import QtWidgets, QtGui
-from PySide6.QtWidgets import QDialog
-from PySide6.QtWidgets import QApplication, QMessageBox
+from PyQt6.QtWidgets import QDialog, QApplication, QMessageBox
+from PyQt6 import QtWidgets, QtGui, QtCore
+from PyQt6.QtCore import Qt
 
-def error(label, window, parent=None):
-    msg_box = QtWidgets.QMessageBox(parent)
-    msg_box.setWindowTitle(window)
-    msg_box.setText(label)
-    msg_box.setIcon(QtWidgets.QMessageBox.Icon.Critical)
-    msg_box.addButton(QtWidgets.QMessageBox.StandardButton.Ok)
-    msg_box.exec()
+ConnectionType = Qt.ConnectionType
+import datetime
+WindowModality = Qt.WindowModality
+WindowType = Qt.WindowType
+Slot = QtCore.pyqtSlot
+
+def show_error(e: Exception):
+    # Create an error message box
+    error_message_box = QMessageBox()
+    error_message_box.setIcon(QMessageBox.Critical)
+
+    # Set the title to the type of the exception
+    error_message_box.setWindowTitle(type(e).__name__)
+
+    # Set the text to the error message
+    error_message_box.setText(str(e))
+    error_message_box.setStandardButtons(QMessageBox.Ok)
+
+    # Show the message box
+    error_message_box.exec()
 
 class WindowFrame(QDialog):
     def __init__(self, *args, **kwargs):
@@ -29,11 +42,6 @@ class WindowFrame(QDialog):
 def Frame(parent, title=""):
     return WindowFrame(parent, windowTitle=title)
     # frame.setIconFromPath = lambda path: frame.setWindowIcon(QtGui.QIcon(path))
-
-
-
-from PySide6 import QtCore
-import datetime
 
 def wx_datetime_to_date(pyside_dt):
     if isinstance(pyside_dt, datetime.date):
@@ -86,21 +94,26 @@ def time_to_wx_datetime(py_time):
     pyside_dt.setHMS(py_time.hour, py_time.minute, py_time.second, py_time.microsecond // 1000)
     return pyside_dt
 
-
-from PySide6 import QtWidgets, QtGui, QtCore
-
 def CreateApp():
     return QtWidgets.QApplication([])
 
 def InitApp(app):
     return app.exec()
 
+def error(label, window, parent=None):
+    msg_box = QtWidgets.QMessageBox(parent)
+    msg_box.setWindowTitle(window)
+    msg_box.setText(label)
+    msg_box.setIcon(QtWidgets.QMessageBox.Icon.Critical)
+    msg_box.addButton(QtWidgets.QMessageBox.StandardButton.Ok)
+    msg_box.exec()
+
 def browser(url):
     QtGui.QDesktopServices.openUrl(QtCore.QUrl(url))
 
 def show_text_frame(text, title="Text Frame", parent=None):
     app = QtWidgets.QApplication.instance() if QtWidgets.QApplication.instance() else create_app()
-    frame = QtWidgets.QWidget(parent, QtCore.Qt.Window)
+    frame = QtWidgets.QWidget(parent, WindowType.Window)
     frame.setWindowTitle(title)
     frame.resize(400, 300)
     layout = QtWidgets.QVBoxLayout(frame)
@@ -122,8 +135,6 @@ def question(label, window, parent=None):
     answer = msg_box.exec()
     return answer == QtWidgets.QMessageBox.StandardButton.Yes
 
-from PySide6 import QtCore, QtWidgets
-
 class ProgressThread(QtCore.QThread):
     def __init__(self, generator, progress_dialog):
         super().__init__()
@@ -140,30 +151,30 @@ class ProgressThread(QtCore.QThread):
             if self.stop_req:
                 return
             i += 1
-            QtCore.QMetaObject.invokeMethod(self.progress_dialog, "update", QtCore.Qt.QueuedConnection, QtCore.Q_ARG(int, i))
+            QtCore.QMetaObject.invokeMethod(self.progress_dialog, "update", ConnectionType.QueuedConnection, QtCore.Q_ARG(int, i))
 
-        QtCore.QMetaObject.invokeMethod(self.progress_dialog, "close_call", QtCore.Qt.QueuedConnection)
+        QtCore.QMetaObject.invokeMethod(self.progress_dialog, "close_call", ConnectionType.QueuedConnection)
 
 class ProgressDialog(QtWidgets.QProgressDialog):
     def __init__(self, parent, title, message, label, maximum, close):
         super().__init__(message, None, 0, maximum, parent)
         self.setWindowTitle(title)
         self.setLabelText(label)
-        self.setWindowModality(QtCore.Qt.ApplicationModal)
+        self.setWindowModality(WindowModality.ApplicationModal)
         self.setAutoClose(True)
         self.setAutoReset(False)
         self.canceled.connect(self.close)
 
         self.__close = close
 
-    @QtCore.Slot(int)
+    @Slot(int)
     def update(self, value):
         try:
             self.setValue(value)
         except RuntimeError:
             pass
 
-    @QtCore.Slot()
+    @Slot()
     def close_call(self):
         close = self.__close
         if callable(close):

@@ -1,5 +1,9 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QLineEdit, QPushButton, QHBoxLayout, QApplication
-
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QCheckBox, QPushButton, QHBoxLayout, QDateEdit, QTimeEdit, QSizePolicy, QApplication, QWidget, QTextEdit, QPlainTextEdit
+from PyQt6.QtCore import QDate, Qt, QTime, QEvent
+from PyQt6 import QtCore, QtWidgets
+from PyQt6.QtGui import QFontMetrics
+AlignmentFlag = Qt.AlignmentFlag
+ScrollBarPolicy = Qt.ScrollBarPolicy
 
 class ListWidget(QWidget):
     def __init__(self, *args, **kwargs):
@@ -78,20 +82,13 @@ class ListWidget(QWidget):
             for _ in range(current_size - size):
                 self.remove_line_edit(self.layout().itemAt(size).layout())
 
-
-from PySide6 import QtWidgets
-from PySide6.QtWidgets import QSizePolicy
-
-
 class SettingsScrolledWindowClass(QtWidgets.QScrollArea):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.setWidgetResizable(True)
-        self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
-        self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(ScrollBarPolicy.ScrollBarAlwaysOn)
+        self.setHorizontalScrollBarPolicy(ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setWidget(QtWidgets.QWidget())
-   #     self.widget().setLayout(QtWidgets.QVBoxLayout())
-   #     self.widget().layout().setAlignment(QtCore.Qt.AlignTop)
         self.setScrollRate(10, 10)
 
     def setScrollRate(self, rate_x, rate_y):
@@ -109,20 +106,12 @@ def SettingsScrolledWindow(self):
     )
     return f.widget()
 
-from PySide6 import QtCore, QtWidgets
 
-from PySide6.QtWidgets import QPlainTextEdit
-
-
-
-from PySide6.QtWidgets import QApplication, QVBoxLayout, QWidget, QTextEdit
-from PySide6.QtGui import QFontMetrics
-from PySide6.QtCore import Qt
 
 class ExpandoTextCtrl(QTextEdit):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(ScrollBarPolicy.ScrollBarAlwaysOff)
         self.textChanged.connect(self.updateHeight)  # Connect the textChanged signal to the updateHeight slot
 
     def resizeEvent(self, event):
@@ -142,8 +131,6 @@ class ExpandoTextCtrl(QTextEdit):
 
 #ExpandoTextCtrl=QtWidgets.QPlainTextEdit
 
-from PySide6.QtWidgets import QDateEdit, QTimeEdit
-from PySide6.QtCore import QDate, Qt, QTime
 
 class TimePickerCtrl(QTimeEdit):
     def __init__(time_edit, parent=None):
@@ -151,7 +138,7 @@ class TimePickerCtrl(QTimeEdit):
 
         time_edit.setDisplayFormat('hh:mm:ss')
         time_edit.setTime(QTime.currentTime())
-        time_edit.setAlignment(Qt.AlignCenter)
+        time_edit.setAlignment(AlignmentFlag.AlignCenter)
         time_edit.setReadOnly(False)
 
 
@@ -160,20 +147,20 @@ class DatePickerCtrl(QDateEdit):
         super().__init__(parent)
         self.setDisplayFormat('yyyy-MM-dd')
         self.setDate(QDate.currentDate())
-        self.setAlignment(Qt.AlignCenter)
+        self.setAlignment(AlignmentFlag.AlignCenter)
         self.setCalendarPopup(True)
 
 
 class UiSettingsPanel(QtWidgets.QWidget):
     def addTabWidget(self):
         notebook = QtWidgets.QTabWidget(self.scrolled_window)
-        self.form_sizer.addWidget(notebook, 1, QtCore.Qt.AlignTop)
+        self.form_sizer.addWidget(notebook, 1, AlignmentFlag.AlignTop)
         notebook.setContentsMargins(0, 0, 0, 0)
         return notebook
 
     def addList(self):
         notebook = ListWidget(self.scrolled_window)
-        self.form_sizer.addWidget(notebook, 1, QtCore.Qt.AlignTop)
+        self.form_sizer.addWidget(notebook, 1, AlignmentFlag.AlignTop)
         return notebook
 
     def incTabWidget(self, notebook, checkbox, value):
@@ -188,7 +175,7 @@ class UiSettingsPanel(QtWidgets.QWidget):
         list_sizer = QtWidgets.QHBoxLayout(list_panel)
         list_sizer.setContentsMargins(0, 0, 0, 0)
         list_panel.setLayout(list_sizer)
-        self.form_sizer.addWidget(list_panel, alignment=QtCore.Qt.AlignTop)
+        self.form_sizer.addWidget(list_panel, alignment=AlignmentFlag.AlignTop)
         label = QtWidgets.QLabel(f'{field_name}', list_panel)
         add_button = QtWidgets.QPushButton('+', list_panel)
         add_button.setFixedWidth(50)
@@ -259,7 +246,7 @@ class UiSettingsPanel(QtWidgets.QWidget):
     def createVerticalLayout():
         layout = QtWidgets.QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
-        layout.setAlignment( Qt.AlignTop)
+        layout.setAlignment( AlignmentFlag.AlignTop)
         return layout
 
     @staticmethod
@@ -323,15 +310,11 @@ class UiSettingsPanel(QtWidgets.QWidget):
 
 
 
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QCheckBox, QPushButton, QHBoxLayout
-from PySide6.QtCore import Qt, QEvent
-
-
 class WrapPanel(QWidget):
     def __init__(self):
         super().__init__()
         self.form_sizer = QVBoxLayout(self)
-        self.form_sizer.setAlignment(Qt.AlignTop)
+        self.form_sizer.setAlignment(AlignmentFlag.AlignTop)
         self.form_sizer.setSpacing(3)
         self.form_sizer.setContentsMargins(3, 3, 3, 3)
 

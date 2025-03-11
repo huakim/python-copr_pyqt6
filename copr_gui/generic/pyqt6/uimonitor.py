@@ -1,10 +1,17 @@
 from .uistatusbar import WindowFrame
 import datetime
 from copr_gui.static.spec_types import getName, getId, getType
+from PyQt6.QtCore import Qt, QAbstractTableModel
+from PyQt6.QtGui import QKeySequence, QClipboard, QCursor, QStandardItemModel, QStandardItem, QAction
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QApplication, QTableView, QAbstractItemView, QMenu
 
-from PySide6.QtGui import QAction
-from PySide6.QtWidgets import QMenu
-
+ItemDataRole = Qt.ItemDataRole
+SortOrder = Qt.SortOrder
+Orientation = Qt.Orientation
+ContextMenuPolicy = Qt.ContextMenuPolicy
+StandardKey = QKeySequence.StandardKey
+ItemFlag = Qt.ItemFlag
+CheckState = Qt.CheckState
 
 class Index(list):
     def __init__(self, row, col):
@@ -27,8 +34,6 @@ class ContextMenu(QMenu):
             nameid = f'on_{nameid}_option'
             if hasattr(self, nameid):
                 item.triggered.connect(getattr(self, nameid))
-
-from PySide6.QtCore import Qt, QAbstractTableModel
 
 class TableModel(QAbstractTableModel):
     def __getattr__(self, name):
@@ -84,7 +89,7 @@ class TableModel(QAbstractTableModel):
         for row in self.__rows:
             row[0] = 1 if check else ''
         self.all = check
-        self.dataChanged.emit(self.index(0, 0), self.index(self.rowCount() - 1, 0), [Qt.CheckStateRole])
+        self.dataChanged.emit(self.index(0, 0), self.index(self.rowCount() - 1, 0), [ItemDataRole.CheckStateRole])
 
     def GetNumberRows(self):
         return len(self.__rows)
@@ -121,7 +126,7 @@ class TableModel(QAbstractTableModel):
             self.appendRow(i)
 
     def SortByColumn(self, col):
-        self.sort(col, Qt.DescendingOrder if not self.sort_reverse else Qt.AscendingOrder)
+        self.sort(col, SortOrder.DescendingOrder if not self.sort_reverse else SortOrder.AscendingOrder)
 
     def rowCount(self, parent=None):
         return len(self.__rows)
@@ -129,55 +134,55 @@ class TableModel(QAbstractTableModel):
     def columnCount(self, parent=None):
         return len(self.columns)
 
-    def data(self, index, role=Qt.DisplayRole):
+    def data(self, index, role=ItemDataRole.DisplayRole):
         if not index.isValid():
             return None
 
         row = index.row()
         col = index.column()
 
-        if role == Qt.DisplayRole and self.column_types[col] != 'bool':
+        if role == ItemDataRole.DisplayRole and self.column_types[col] != 'bool':
             return str(self.__rows[row][col])
-        elif role == Qt.CheckStateRole and self.column_types[col] == 'bool':
-            return Qt.Checked if bool(self.__rows[row][col]) else Qt.Unchecked
+        elif role == ItemDataRole.CheckStateRole and self.column_types[col] == 'bool':
+            return CheckState.Checked if bool(self.__rows[row][col]) else CheckState.Unchecked
 
         return None
 
-    def setData(self, index, value, role=Qt.EditRole):
+    def setData(self, index, value, role=ItemDataRole.EditRole):
         if not index.isValid():
             return False
 
         row = index.row()
         col = index.column()
 
-        if role == Qt.CheckStateRole and self.column_types[col] == 'bool':
+        if role == ItemDataRole.CheckStateRole and self.column_types[col] == 'bool':
             self.__rows[row][col] = value != 0
-            if col == 0 and value != Qt.Checked:
+            if col == 0 and value != CheckState.Checked:
                 self.all = False
             self.dataChanged.emit(index, index, [role])
             return True
 
         return False
 
-    def headerData(self, section, orientation, role=Qt.DisplayRole):
-        if orientation == Qt.Horizontal and role == Qt.DisplayRole:
+    def headerData(self, section, orientation, role=ItemDataRole.DisplayRole):
+        if orientation == Orientation.Horizontal and role == ItemDataRole.DisplayRole:
             return self.column_names[section]
-        elif orientation == Qt.Vertical and role == Qt.DisplayRole:
+        elif orientation == Orientation.Vertical and role == ItemDataRole.DisplayRole:
             return str(section + 1)
 
         return None
 
     def flags(self, index):
-        flags = Qt.ItemIsEnabled | Qt.ItemIsSelectable
+        flags = ItemFlag.ItemIsEnabled | ItemFlag.ItemIsSelectable
 
         if self.column_types[index.column()] == 'bool' :
-            flags |= Qt.ItemIsUserCheckable
+            flags |= ItemFlag.ItemIsUserCheckable
 
         return flags
 
-    def sort(self, column, order=Qt.AscendingOrder):
+    def sort(self, column, order=SortOrder.AscendingOrder):
         self.sort_col = column
-        self.sort_reverse = order == Qt.DescendingOrder
+        self.sort_reverse = order == SortOrder.DescendingOrder
 
         self.__rows.sort(key=lambda x: x[column], reverse=self.sort_reverse)
         self.layoutChanged.emit()
@@ -203,16 +208,11 @@ class TableModel(QAbstractTableModel):
     Clear=clear
     ColumnCount=columnCount
 
-from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QTableView, QAbstractItemView
-from PySide6.QtGui import QKeySequence, QClipboard
-from PySide6.QtGui import QCursor
-
 class CustomTable(QTableView):
 
     def PopupMenu(self, menu):
         cursor_position = self.mapFromGlobal(QCursor.pos())
-        selected_action = menu.exec_(self.mapToGlobal(cursor_position))
+        selected_action = menu.exec(self.mapToGlobal(cursor_position))
 
     def __init__(self, parent, table):
         super().__init__(parent)
@@ -225,7 +225,7 @@ class CustomTable(QTableView):
         self.verticalHeader().setDefaultSectionSize(25)
         self.setColumnWidth(0, 35)  # Set the width of the first column (Check column)
         for col in range(1, self.model().columnCount()):
-            label = self.table_model.headerData(col, Qt.Horizontal)
+            label = self.table_model.headerData(col, Orientation.Horizontal)
             width = self.fontMetrics().boundingRect(label).width() + 40  # Calculate the width based on the label
             self.setColumnWidth(col, width)  # Set the width of the column
 
@@ -234,7 +234,7 @@ class CustomTable(QTableView):
 
         self.horizontalHeader().sectionClicked.connect(self.handleHeaderClick)
         copy_action = self.addAction("Copy")
-        copy_action.setShortcut(QKeySequence.Copy)
+        copy_action.setShortcut(StandardKey.Copy)
         copy_action.triggered.connect(self.copySelection)
 
   #      self.clicked.connect(self.onLabelLeftClick)
@@ -242,7 +242,7 @@ class CustomTable(QTableView):
         self.table_model.SortByColumn(index)
 
     def keyPressEvent(self, event):
-        if event.matches(QKeySequence.Copy):
+        if event.matches(StandardKey.Copy):
             self.copySelection()
         else:
             super().keyPressEvent(event)
@@ -259,7 +259,7 @@ class CustomTable(QTableView):
                 row_data = []
                 for col in columns:
                     index = self.model().index(row, col)
-                    value = self.model().data(index, Qt.DisplayRole)
+                    value = self.model().data(index, ItemDataRole.DisplayRole)
                     row_data.append(str(value))
                 data.append(row_data)
 
@@ -271,10 +271,6 @@ class CustomTable(QTableView):
   #      col = index.column()
   #      self.model().sort(col, Qt.AscendingOrder)
   #      self.viewport().update()
-
-from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QTableView, QApplication
-from PySide6.QtGui import QStandardItemModel, QStandardItem
 
 class MonitorFrame(WindowFrame):
     def __init__(self, parent, button_names, column_names, title=""):
@@ -302,7 +298,7 @@ class MonitorFrame(WindowFrame):
 
         self.vertical_layout.addWidget(self.custom_table)
 
-        table.setContextMenuPolicy(Qt.CustomContextMenu)
+        table.setContextMenuPolicy(ContextMenuPolicy.CustomContextMenu)
         table.customContextMenuRequested.connect(self.onTableRightClicked)
 
     def PopupMenu(self, menu):
