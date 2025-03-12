@@ -5,6 +5,8 @@ from PyQt6.QtCore import Qt, QAbstractTableModel
 from PyQt6.QtGui import QKeySequence, QClipboard, QCursor, QStandardItemModel, QStandardItem, QAction
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QApplication, QTableView, QAbstractItemView, QMenu
 
+ClipMode = QClipboard.Mode
+QClipboard = QApplication.clipboard
 ItemDataRole = Qt.ItemDataRole
 SortOrder = Qt.SortOrder
 Orientation = Qt.Orientation
@@ -265,7 +267,7 @@ class CustomTable(QTableView):
 
             text = '\n'.join(['\t'.join(row) for row in data])
             clipboard = QClipboard()
-            clipboard.setText(text, mode=QClipboard.Clipboard)
+            clipboard.setText(text, mode=ClipMode.Clipboard)
 
   #  def onLabelLeftClick(self, index):
   #      col = index.column()

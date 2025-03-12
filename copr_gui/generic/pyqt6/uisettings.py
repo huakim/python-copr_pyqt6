@@ -1,10 +1,11 @@
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QCheckBox, QPushButton, QHBoxLayout, QDateEdit, QTimeEdit, QSizePolicy, QApplication, QWidget, QTextEdit, QPlainTextEdit
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QCheckBox, QPushButton, QHBoxLayout, QDateEdit, QTimeEdit, QSizePolicy, QApplication, QWidget, QTextEdit, QPlainTextEdit, QLineEdit
 from PyQt6.QtCore import QDate, Qt, QTime, QEvent
 from PyQt6 import QtCore, QtWidgets
 from PyQt6.QtGui import QFontMetrics
 AlignmentFlag = Qt.AlignmentFlag
 ScrollBarPolicy = Qt.ScrollBarPolicy
 QSizePolicy = QSizePolicy.Policy
+EventType = QEvent.Type
 
 class ListWidget(QWidget):
     def __init__(self, *args, **kwargs):
@@ -125,7 +126,7 @@ class ExpandoTextCtrl(QTextEdit):
 
     def updateHeight(self):
         document = self.document()
-        height = document.size().height()+5
+        height = int(document.size().height()+5)
         self.setMaximumHeight(height)
         self.setMinimumHeight(height)
 
@@ -214,7 +215,7 @@ class UiSettingsPanel(QtWidgets.QWidget):
         return panel
 
     def addLine(self):
-        text_ctrl = QtWidgets.QLineEdit(self.scrolled_window)
+        text_ctrl = QLineEdit(self.scrolled_window)
         self.form_sizer.addWidget(text_ctrl)
         return text_ctrl
 
@@ -290,7 +291,7 @@ class UiSettingsPanel(QtWidgets.QWidget):
 
 
     SetTextValue = staticmethod(ExpandoTextCtrl.setPlainText)
-    SetLineValue = staticmethod(QtWidgets.QLineEdit.setText)
+    SetLineValue = staticmethod(QLineEdit.setText)
     SetDateValue = staticmethod(DatePickerCtrl.setDate)
     SetTimeValue = staticmethod(TimePickerCtrl.setTime)
     SetCheckBoxValue = staticmethod(QtWidgets.QCheckBox.setChecked)
@@ -300,7 +301,7 @@ class UiSettingsPanel(QtWidgets.QWidget):
 
 
     GetTextValue = staticmethod(ExpandoTextCtrl.toPlainText)
-    GetLineValue = staticmethod(QtWidgets.QLineEdit.text)
+    GetLineValue = staticmethod(QLineEdit.text)
     GetDateValue = staticmethod(DatePickerCtrl.date)
     GetTimeValue = staticmethod(TimePickerCtrl.time)
     GetCheckBoxValue = staticmethod(QtWidgets.QCheckBox.isChecked)
@@ -324,7 +325,7 @@ class WrapPanel(QWidget):
         return widget
 
     def eventFilter(self, obj, event):
-        if event.type() == QEvent.Resize:
+        if event.type() == EventType.Resize:
             self.wrap_widgets()
         return super().eventFilter(obj, event)
 
