@@ -1,3 +1,4 @@
-[submodule "st"]
-	path = st
+[submodule "python-copr-setup"]
+	path = python-copr-setup
 	url = https://github.com/huakim/python-copr-setup
+	branch = master
