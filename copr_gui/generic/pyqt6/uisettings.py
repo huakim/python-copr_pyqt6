@@ -4,6 +4,7 @@ from PyQt6 import QtCore, QtWidgets
 from PyQt6.QtGui import QFontMetrics
 AlignmentFlag = Qt.AlignmentFlag
 ScrollBarPolicy = Qt.ScrollBarPolicy
+QSizePolicy = QSizePolicy.Policy
 
 class ListWidget(QWidget):
     def __init__(self, *args, **kwargs):
