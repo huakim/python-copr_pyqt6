@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QDialog, QApplication, QMessageBox
+from PyQt6.QtWidgets import QDialog, QApplication, QMessageBox, QMainWindow
 from PyQt6 import QtWidgets, QtGui, QtCore
 from PyQt6.QtCore import Qt
 
@@ -8,36 +8,34 @@ WindowModality = Qt.WindowModality
 WindowType = Qt.WindowType
 Slot = QtCore.pyqtSlot
 
-def show_error(e: Exception):
-    # Create an error message box
-    error_message_box = QMessageBox()
-    error_message_box.setIcon(QMessageBox.Critical)
+opened_windowes = set()
 
-    # Set the title to the type of the exception
-    error_message_box.setWindowTitle(type(e).__name__)
+class ParentWindowFrame(QMainWindow):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        opened_windowes.add(self)
 
-    # Set the text to the error message
-    error_message_box.setText(str(e))
-    error_message_box.setStandardButtons(QMessageBox.Ok)
-
-    # Show the message box
-    error_message_box.exec()
+    def closeEvent(self, event):
+        opened_windowes.remove(self)
+        super().closeEvent(event)
 
 class WindowFrame(QDialog):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        win = self._win = ParentWindowFrame(*args, **kwargs)
+        super().__init__()
+        win.setCentralWidget(self)
 
     def Show(self):
-        return super().show()
+        return self._win.show()
 
     def SetTitle(self, title):
-        return super().setWindowTitle(title)
+        return self._win.setWindowTitle(title)
 
     def Close(self):
-        return super().close()
+        return self._win.close()
 
     def SetIconFromPath(self, path):
-        return super().setWindowIcon(QtGui.QIcon(path))
+        return self._win.setWindowIcon(QtGui.QIcon(path))
 
 def Frame(parent, title=""):
     return WindowFrame(parent, windowTitle=title)
