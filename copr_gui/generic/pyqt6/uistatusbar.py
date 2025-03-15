@@ -8,16 +8,19 @@ WindowModality = Qt.WindowModality
 WindowType = Qt.WindowType
 Slot = QtCore.pyqtSlot
 
-opened_windowes = set()
+opened_windowes = dict()
 
 class ParentWindowFrame(QMainWindow):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        opened_windowes.add(self)
+        opened_windowes[id(self)] = self
 
     def closeEvent(self, event):
-        opened_windowes.remove(self)
         super().closeEvent(event)
+        try:
+            del opened_windowes[id(self)]
+        except KeyError:
+            pass
 
 class WindowFrame(QDialog):
     def __init__(self, *args, **kwargs):
@@ -39,7 +42,6 @@ class WindowFrame(QDialog):
 
 def Frame(parent, title=""):
     return WindowFrame(parent, windowTitle=title)
-    # frame.setIconFromPath = lambda path: frame.setWindowIcon(QtGui.QIcon(path))
 
 def wx_datetime_to_date(pyside_dt):
     if isinstance(pyside_dt, datetime.date):
