@@ -17,6 +17,7 @@ class ParentWindowFrame(QMainWindow):
 
     def closeEvent(self, event):
         opened_windowes.remove(self)
+        print("I AM CLOSED")
         super().closeEvent(event)
 
 class WindowFrame(QDialog):
