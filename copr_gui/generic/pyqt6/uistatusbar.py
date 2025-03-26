@@ -134,11 +134,9 @@ def browser(url):
 
 
 def show_text_frame(text, title="Text Frame", parent=None):
-    app = (
-        QtWidgets.QApplication.instance()
-        if QtWidgets.QApplication.instance()
-        else CreateApp()
-    )
+    app = QtWidgets.QApplication.instance()
+    if not app:
+        app = CreateApp()
     frame = QtWidgets.QWidget(parent, WindowType.Window)
     frame.setWindowTitle(title)
     frame.resize(400, 300)
