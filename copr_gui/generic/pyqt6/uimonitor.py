@@ -1,9 +1,26 @@
 from .uistatusbar import WindowFrame
-import datetime
+
+# import datetime
 from copr_gui.static.spec_types import getName, getId, getType
 from PyQt6.QtCore import Qt, QAbstractTableModel
-from PyQt6.QtGui import QKeySequence, QClipboard, QCursor, QStandardItemModel, QStandardItem, QAction
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QApplication, QTableView, QAbstractItemView, QMenu
+from PyQt6.QtGui import (
+    QKeySequence,
+    QClipboard,
+    QCursor,
+    # QStandardItemModel,
+    # QStandardItem,
+    QAction,
+)
+from PyQt6.QtWidgets import (
+    # QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
+    QPushButton,
+    QApplication,
+    QTableView,
+    # QAbstractItemView,
+    QMenu,
+)
 
 ClipMode = QClipboard.Mode
 QClipboard = QApplication.clipboard
@@ -15,13 +32,17 @@ StandardKey = QKeySequence.StandardKey
 ItemFlag = Qt.ItemFlag
 CheckState = Qt.CheckState
 
+
 class Index(list):
     def __init__(self, row, col):
         list.__init__(self, (row, col))
+
     def GetRow(self):
         return self[0]
+
     def GetCol(self):
         return self[1]
+
 
 class ContextMenu(QMenu):
     def __init__(self, parent, menus):
@@ -33,42 +54,46 @@ class ContextMenu(QMenu):
             item = QAction(name, self)
             self.addAction(item)
             setattr(self, nameid, item)
-            nameid = f'on_{nameid}_option'
+            nameid = f"on_{nameid}_option"
             if hasattr(self, nameid):
                 item.triggered.connect(getattr(self, nameid))
 
+
 class TableModel(QAbstractTableModel):
     def __getattr__(self, name):
-        if name == 'column_names':
+        if name == "column_names":
             func = getName
-        elif name == 'column_ids':
+        elif name == "column_ids":
             func = getId
-        elif name == 'column_types':
-            func = lambda item, default='str': getType(item, default)
+        elif name == "column_types":
+
+            def func(item, default="str"):
+                return getType(item, default)
+
         else:
             raise AttributeError(name)
         try:
             return self.__data[name]
-        except KeyError: 
+        except KeyError:
             data = self.__data[name] = [func(i) for i in self.columns]
             return data
-            
+
     def __init__(self, columns, data=None):
         super().__init__()
         self.__data = dict()
-        self.columns = [{'id': 'check_state', 'name': '', 'type': 'bool'}] + columns
-      #  self.column_names = [''] + [getName(i) for i in column_names]
-      #  self.types = ['bool'] + [getType(i, 'str') for i in column_names]
+        self.columns = [{"id": "check_state", "name": "", "type": "bool"}] + columns
+        #  self.column_names = [''] + [getName(i) for i in column_names]
+        #  self.types = ['bool'] + [getType(i, 'str') for i in column_names]
         data = self.__rows = [] if data is None else data
         self.sort_col = None
-        all=True
+        all = True
         for i in data:
             if not data[0]:
-                all=False
+                all = False
                 break
         self.all = all
         self.sort_reverse = False
-        
+
     def DropItems(self, items):
         rows = []
         for i, item in enumerate(self.__rows):
@@ -89,9 +114,13 @@ class TableModel(QAbstractTableModel):
 
     def CheckAll(self, check=True):
         for row in self.__rows:
-            row[0] = 1 if check else ''
+            row[0] = 1 if check else ""
         self.all = check
-        self.dataChanged.emit(self.index(0, 0), self.index(self.rowCount() - 1, 0), [ItemDataRole.CheckStateRole])
+        self.dataChanged.emit(
+            self.index(0, 0),
+            self.index(self.rowCount() - 1, 0),
+            [ItemDataRole.CheckStateRole],
+        )
 
     def GetNumberRows(self):
         return len(self.__rows)
@@ -106,7 +135,7 @@ class TableModel(QAbstractTableModel):
         return self.__rows[rowid]
 
     def GetItemsByCheck(self, check=True):
-        return [i for i in self.__rows if bool(i[0]) == check ]
+        return [i for i in self.__rows if bool(i[0]) == check]
 
     def GetValue(self, row, col):
         return self.__rows[row][col]
@@ -114,7 +143,7 @@ class TableModel(QAbstractTableModel):
     def SetValue(self, row, col, value):
         if col == 0:
             if not value:
-                self.all=False
+                self.all = False
         self.__rows[row][col] = value
 
     def GetColLabelValue(self, col):
@@ -128,7 +157,14 @@ class TableModel(QAbstractTableModel):
             self.appendRow(i)
 
     def SortByColumn(self, col):
-        self.sort(col, SortOrder.DescendingOrder if not self.sort_reverse else SortOrder.AscendingOrder)
+        self.sort(
+            col,
+            (
+                SortOrder.DescendingOrder
+                if not self.sort_reverse
+                else SortOrder.AscendingOrder
+            ),
+        )
 
     def rowCount(self, parent=None):
         return len(self.__rows)
@@ -143,10 +179,14 @@ class TableModel(QAbstractTableModel):
         row = index.row()
         col = index.column()
 
-        if role == ItemDataRole.DisplayRole and self.column_types[col] != 'bool':
+        if role == ItemDataRole.DisplayRole and self.column_types[col] != "bool":
             return str(self.__rows[row][col])
-        elif role == ItemDataRole.CheckStateRole and self.column_types[col] == 'bool':
-            return CheckState.Checked if bool(self.__rows[row][col]) else CheckState.Unchecked
+        elif role == ItemDataRole.CheckStateRole and self.column_types[col] == "bool":
+            return (
+                CheckState.Checked
+                if bool(self.__rows[row][col])
+                else CheckState.Unchecked
+            )
 
         return None
 
@@ -157,7 +197,7 @@ class TableModel(QAbstractTableModel):
         row = index.row()
         col = index.column()
 
-        if role == ItemDataRole.CheckStateRole and self.column_types[col] == 'bool':
+        if role == ItemDataRole.CheckStateRole and self.column_types[col] == "bool":
             self.__rows[row][col] = value != 0
             if col == 0 and value != CheckState.Checked:
                 self.all = False
@@ -177,7 +217,7 @@ class TableModel(QAbstractTableModel):
     def flags(self, index):
         flags = ItemFlag.ItemIsEnabled | ItemFlag.ItemIsSelectable
 
-        if self.column_types[index.column()] == 'bool' :
+        if self.column_types[index.column()] == "bool":
             flags |= ItemFlag.ItemIsUserCheckable
 
         return flags
@@ -190,13 +230,15 @@ class TableModel(QAbstractTableModel):
         self.layoutChanged.emit()
 
     def appendRow(self, row_data):
-        self.beginInsertRows(self.index(len(self.__rows), 0), len(self.__rows), len(self.__rows))
+        self.beginInsertRows(
+            self.index(len(self.__rows), 0), len(self.__rows), len(self.__rows)
+        )
         self.__rows.append(row_data)
         self.endInsertRows()
 
     def removeRows(self, row, count, parent=None):
         self.beginRemoveRows(self.index(row, 0, parent), row, row + count - 1)
-        del self.__rows[row:row + count]
+        del self.__rows[row: row + count]
         self.endRemoveRows()
 
     def clear(self):
@@ -205,41 +247,35 @@ class TableModel(QAbstractTableModel):
             self.__rows.clear()
             self.endRemoveRows()
 
+    RowCount = rowCount
+    Clear = clear
+    ColumnCount = columnCount
 
-    RowCount=rowCount
-    Clear=clear
-    ColumnCount=columnCount
 
 class CustomTable(QTableView):
 
     def PopupMenu(self, menu):
         cursor_position = self.mapFromGlobal(QCursor.pos())
-        selected_action = menu.exec(self.mapToGlobal(cursor_position))
+        return menu.exec(self.mapToGlobal(cursor_position))
 
-    def __init__(self, parent, table):
+    def __init__(self, parent, table_model):
         super().__init__(parent)
-
-        if table is None:
-            self.table_model = TableModel(column_names)
-        else:
-            self.table_model = table
-        self.setModel(self.table_model)
+        self.table_model = table_model
+        self.setModel(table_model)
         self.verticalHeader().setDefaultSectionSize(25)
         self.setColumnWidth(0, 35)  # Set the width of the first column (Check column)
         for col in range(1, self.model().columnCount()):
-            label = self.table_model.headerData(col, Orientation.Horizontal)
-            width = self.fontMetrics().boundingRect(label).width() + 40  # Calculate the width based on the label
+            label = table_model.headerData(col, Orientation.Horizontal)
+            width = (
+                self.fontMetrics().boundingRect(label).width() + 40
+            )  # Calculate the width based on the label
             self.setColumnWidth(col, width)  # Set the width of the column
-
-  #      self.setEditTriggers(QAbstractItemView.NoEditTriggers)
-  #      self.setContextMenuPolicy(Qt.ActionsContextMenu)
-
         self.horizontalHeader().sectionClicked.connect(self.handleHeaderClick)
         copy_action = self.addAction("Copy")
         copy_action.setShortcut(StandardKey.Copy)
         copy_action.triggered.connect(self.copySelection)
 
-  #      self.clicked.connect(self.onLabelLeftClick)
+    #      self.clicked.connect(self.onLabelLeftClick)
     def handleHeaderClick(self, index):
         self.table_model.SortByColumn(index)
 
@@ -265,14 +301,10 @@ class CustomTable(QTableView):
                     row_data.append(str(value))
                 data.append(row_data)
 
-            text = '\n'.join(['\t'.join(row) for row in data])
+            text = "\n".join(["\t".join(row) for row in data])
             clipboard = QClipboard()
             clipboard.setText(text, mode=ClipMode.Clipboard)
 
-  #  def onLabelLeftClick(self, index):
-  #      col = index.column()
-  #      self.model().sort(col, Qt.AscendingOrder)
-  #      self.viewport().update()
 
 class MonitorFrame(WindowFrame):
     def __init__(self, parent, button_names, column_names, title=""):
@@ -281,7 +313,7 @@ class MonitorFrame(WindowFrame):
         self.resize(1000, 600)
 
         vertical = self.vertical_layout = QVBoxLayout(self)
-        vertical.setContentsMargins(5,5,5,5)
+        vertical.setContentsMargins(5, 5, 5, 5)
 
         self.button_layout = QHBoxLayout()
         self.buttons = []  # List to store custom buttons
@@ -330,9 +362,9 @@ class MonitorFrame(WindowFrame):
         label = getId(label)
         button = QPushButton(label_text, self)
         self.button_layout.addWidget(button)
-        label = f'button_{label}'
+        label = f"button_{label}"
         setattr(self, label, button)
-        label = f'{label}_clicked'
+        label = f"{label}_clicked"
         if hasattr(self, label):
             button.clicked.connect(getattr(self, label))
 
@@ -341,28 +373,29 @@ class MonitorFrame(WindowFrame):
         model.CheckAll(not model.AllChecked())
         self.custom_table.viewport().update()
 
-if __name__ == '__main__':
-    app = CreateApp()
 
-    button_names = ['Button 1', 'Button 2', 'Button 3']
-    column_names = ['Column 1', 'Column 2', 'Column 3']
+# if __name__ == "__main__":
+#     app = CreateApp()
 
-    frame = MonitorFrame(None, button_names, column_names)
+#     button_names = ["Button 1", "Button 2", "Button 3"]
+#     column_names = ["Column 1", "Column 2", "Column 3"]
 
-    # Add rows to the custom table
-    model = frame.model
- #   model.setColumnCount(len(column_names))
-  #  model.setHorizontalHeaderLabels(column_names)
+#     frame = MonitorFrame(None, button_names, column_names)
 
-    row_data = [
-        ['1', 'Value 1', 'Value 2', 'Value 3'],
-        ['', 'Value 4', 'Value 5', 'Value 6'],
-  #      ['', 'Value 5', 'Value 2', 'Value 4'],
-  #      ['', 'Value 4', 'Value 5', 'Value 6']
-    ]
+#     # Add rows to the custom table
+#     model = frame.model
+#     model.setColumnCount(len(column_names))
+#     model.setHorizontalHeaderLabels(column_names)
 
-  #  for row in row_data:
-  #      items = [QStandardItem(item) for item in row]
-    model.AppendRow(*row_data)
+#     row_data = [
+#         ["1", "Value 1", "Value 2", "Value 3"],
+#         ["", "Value 4", "Value 5", "Value 6"],
+#         ['', 'Value 5', 'Value 2', 'Value 4'],
+#         ['', 'Value 4', 'Value 5', 'Value 6']
+#     ]
 
-    InitApp(app)
+#     for row in row_data:
+#         items = [QStandardItem(item) for item in row]
+#     model.AppendRow(*row_data)
+
+#     InitApp(app)

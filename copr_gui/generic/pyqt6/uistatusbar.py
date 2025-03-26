@@ -1,14 +1,16 @@
-from PyQt6.QtWidgets import QDialog, QApplication, QMessageBox, QMainWindow
+from PyQt6.QtWidgets import QDialog, QMainWindow  # , QApplication, QMessageBox
 from PyQt6 import QtWidgets, QtGui, QtCore
 from PyQt6.QtCore import Qt
+import datetime
 
 ConnectionType = Qt.ConnectionType
-import datetime
+
 WindowModality = Qt.WindowModality
 WindowType = Qt.WindowType
 Slot = QtCore.pyqtSlot
 
 opened_windowes = dict()
+
 
 class ParentWindowFrame(QMainWindow):
     def __init__(self, *args, **kwargs):
@@ -21,6 +23,7 @@ class ParentWindowFrame(QMainWindow):
             del opened_windowes[id(self)]
         except KeyError:
             pass
+
 
 class WindowFrame(QDialog):
     def __init__(self, *args, **kwargs):
@@ -40,8 +43,10 @@ class WindowFrame(QDialog):
     def SetIconFromPath(self, path):
         return self._win.setWindowIcon(QtGui.QIcon(path))
 
+
 def Frame(parent, title=""):
     return WindowFrame(parent, windowTitle=title)
+
 
 def wx_datetime_to_date(pyside_dt):
     if isinstance(pyside_dt, datetime.date):
@@ -56,19 +61,26 @@ def wx_datetime_to_date(pyside_dt):
     day = pyside_dt.day()
     return datetime.date(year, month, day)
 
+
 def wx_datetime_to_time(pyside_dt):
     if isinstance(pyside_dt, datetime.time):
         return pyside_dt
     elif isinstance(pyside_dt, int):
         return datetime.datetime.fromtimestamp(pyside_dt).time()
     elif isinstance(pyside_dt, QtCore.QTime):
-        return datetime.time(pyside_dt.hour(), pyside_dt.minute(), pyside_dt.second(), pyside_dt.msec() * 1000)
+        return datetime.time(
+            pyside_dt.hour(),
+            pyside_dt.minute(),
+            pyside_dt.second(),
+            pyside_dt.msec() * 1000,
+        )
 
     hour = pyside_dt.hour()
     minute = pyside_dt.minute()
     second = pyside_dt.second()
     microsecond = pyside_dt.msec() * 1000
     return datetime.time(hour, minute, second, microsecond)
+
 
 def date_to_wx_datetime(py_date):
     if isinstance(py_date, QtCore.QDate):
@@ -82,23 +94,31 @@ def date_to_wx_datetime(py_date):
     pyside_dt.setDate(py_date.year, py_date.month, py_date.day)
     return pyside_dt
 
+
 def time_to_wx_datetime(py_time):
     if isinstance(py_time, QtCore.QTime):
         return py_time
     elif isinstance(py_time, int):
         return QtCore.QDateTime.fromSecsSinceEpoch(py_time).time()
     elif isinstance(py_time, datetime.datetime):
-        return QtCore.QTime(py_time.hour, py_time.minute, py_time.second, py_time.microsecond // 1000)
+        return QtCore.QTime(
+            py_time.hour, py_time.minute, py_time.second, py_time.microsecond // 1000
+        )
 
     pyside_dt = QtCore.QTime()
-    pyside_dt.setHMS(py_time.hour, py_time.minute, py_time.second, py_time.microsecond // 1000)
+    pyside_dt.setHMS(
+        py_time.hour, py_time.minute, py_time.second, py_time.microsecond // 1000
+    )
     return pyside_dt
+
 
 def CreateApp():
     return QtWidgets.QApplication([])
 
+
 def InitApp(app):
     return app.exec()
+
 
 def error(label, window, parent=None):
     msg_box = QtWidgets.QMessageBox(parent)
@@ -108,11 +128,17 @@ def error(label, window, parent=None):
     msg_box.addButton(QtWidgets.QMessageBox.StandardButton.Ok)
     msg_box.exec()
 
+
 def browser(url):
     QtGui.QDesktopServices.openUrl(QtCore.QUrl(url))
 
+
 def show_text_frame(text, title="Text Frame", parent=None):
-    app = QtWidgets.QApplication.instance() if QtWidgets.QApplication.instance() else create_app()
+    app = (
+        QtWidgets.QApplication.instance()
+        if QtWidgets.QApplication.instance()
+        else CreateApp()
+    )
     frame = QtWidgets.QWidget(parent, WindowType.Window)
     frame.setWindowTitle(title)
     frame.resize(400, 300)
@@ -125,6 +151,7 @@ def show_text_frame(text, title="Text Frame", parent=None):
     frame.show()
     app.exec()
 
+
 def question(label, window, parent=None):
     msg_box = QtWidgets.QMessageBox(parent)
     msg_box.setWindowTitle(window)
@@ -134,6 +161,7 @@ def question(label, window, parent=None):
     msg_box.addButton(QtWidgets.QMessageBox.StandardButton.No)
     answer = msg_box.exec()
     return answer == QtWidgets.QMessageBox.StandardButton.Yes
+
 
 class ProgressThread(QtCore.QThread):
     def __init__(self, generator, progress_dialog):
@@ -151,9 +179,17 @@ class ProgressThread(QtCore.QThread):
             if self.stop_req:
                 return
             i += 1
-            QtCore.QMetaObject.invokeMethod(self.progress_dialog, "update", ConnectionType.QueuedConnection, QtCore.Q_ARG(int, i))
+            QtCore.QMetaObject.invokeMethod(
+                self.progress_dialog,
+                "update",
+                ConnectionType.QueuedConnection,
+                QtCore.Q_ARG(int, i),
+            )
 
-        QtCore.QMetaObject.invokeMethod(self.progress_dialog, "close_call", ConnectionType.QueuedConnection)
+        QtCore.QMetaObject.invokeMethod(
+            self.progress_dialog, "close_call", ConnectionType.QueuedConnection
+        )
+
 
 class ProgressDialog(QtWidgets.QProgressDialog):
     def __init__(self, parent, title, message, label, maximum, close):
@@ -183,11 +219,11 @@ class ProgressDialog(QtWidgets.QProgressDialog):
             self.close()
 
     def closeEvent(self, event):
-        if hasattr(self, 'thread'):
+        if hasattr(self, "thread"):
             self.thread.stop()
         super().closeEvent(event)
 
-    CloseEvent=closeEvent
+    CloseEvent = closeEvent
     CloseCall = close_call
     Update = update
 
@@ -196,8 +232,12 @@ def job_generator(data, function):
     for i in data:
         yield function(i)
 
+
 def execute_data_with_progress(data, job, label, window, close=True):
-    return execute_with_progress(job_generator(data, job), len(data), label, window, close)
+    return execute_with_progress(
+        job_generator(data, job), len(data), label, window, close
+    )
+
 
 def execute_with_progress(generator, length, label, window, close=True):
     dialog = ProgressDialog(None, window, label, label, length, close)
@@ -207,27 +247,38 @@ def execute_with_progress(generator, length, label, window, close=True):
     dialog.show()
     return dialog
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     import time
+
     def job_function(ev):
         time.sleep(1)
         print(ev)
+
     class MainWindow(QtWidgets.QWidget):
-      def __init__(self, parent):
-        super().__init__(parent)
-        self.setWindowTitle("Main Window")
-        layout = QtWidgets.QVBoxLayout(self)
+        def __init__(self, parent):
+            super().__init__(parent)
+            self.setWindowTitle("Main Window")
+            layout = QtWidgets.QVBoxLayout(self)
 
-        button = QtWidgets.QPushButton("Start Job", self)
-        layout.addWidget(button)
+            button = QtWidgets.QPushButton("Start Job", self)
+            layout.addWidget(button)
 
-        button.clicked.connect(lambda: execute_data_with_progress(job=job_function, data=[1, 2, 3, 4, 5, 6, 7, 8], label="Points", window="Progress Window", close=False))
+            button.clicked.connect(
+                lambda: execute_data_with_progress(
+                    job=job_function,
+                    data=[1, 2, 3, 4, 5, 6, 7, 8],
+                    label="Points",
+                    window="Progress Window",
+                    close=False,
+                )
+            )
+
     app = CreateApp()
 
-    frame = Frame(None, 'fine')
+    frame = Frame(None, "fine")
     panel = MainWindow(frame)
 
     frame.show()
 
     InitApp(app)
-
