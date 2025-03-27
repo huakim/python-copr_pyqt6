@@ -1,4 +1,4 @@
-name='qt'
+name='pyqt6'
 url='https://github.com/huakim/python-copr_pyqt6'
 script='copr-qt'
 requires=[]
