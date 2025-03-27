@@ -1,27 +1,20 @@
 from .uistatusbar import WindowFrame
-
+from PyQt6 import QtWidgets, QtGui, QtCore
 # import datetime
 from copr_gui.static.spec_types import getName, getId, getType
-from PyQt6.QtCore import Qt, QAbstractTableModel
-from PyQt6.QtGui import (
-    QKeySequence,
-    QClipboard,
-    QCursor,
-    # QStandardItemModel,
-    # QStandardItem,
-    QAction,
-)
-from PyQt6.QtWidgets import (
-    # QWidget,
-    QVBoxLayout,
-    QHBoxLayout,
-    QPushButton,
-    QApplication,
-    QTableView,
-    # QAbstractItemView,
-    QMenu,
-)
 
+QVBoxLayout = QtWidgets.QVBoxLayout
+QHBoxLayout = QtWidgets.QHBoxLayout
+QPushButton = QtWidgets.QPushButton
+QApplication = QtWidgets.QApplication
+QTableView = QtWidgets.QTableView
+QMenu = QtWidgets.QMenu
+QKeySequence = QtGui.QKeySequence
+QClipboard = QtGui.QClipboard
+QCursor = QtGui.QCursor
+QAction = QtGui.QAction
+Qt = QtCore.Qt
+QAbstractTableModel = QtCore.QAbstractTableModel
 ClipMode = QClipboard.Mode
 QClipboard = QApplication.clipboard
 ItemDataRole = Qt.ItemDataRole

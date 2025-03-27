@@ -1,26 +1,24 @@
-from PyQt6.QtWidgets import (
-    # QWidget,
-    QVBoxLayout,
-    QCheckBox,
-    QPushButton,
-    QHBoxLayout,
-    QDateEdit,
-    QTimeEdit,
-    QSizePolicy,
-    # QApplication,
-    QWidget,
-    QTextEdit,
-    # QPlainTextEdit,
-    QLineEdit,
-)
-from PyQt6.QtCore import QDate, Qt, QTime, QEvent
-from PyQt6 import QtWidgets  # , QtCore
+from PyQt6 import QtWidgets, QtCore
 # from PyQt6.QtGui import QFontMetrics
 
-AlignmentFlag = Qt.AlignmentFlag
+QDate           = QtCore.QDate
+Qt              = QtCore.Qt
+QTime           = QtCore.QTime
+QEvent          = QtCore.QEvent
+QVBoxLayout     = QtWidgets.QVBoxLayout
+QCheckBox       = QtWidgets.QCheckBox
+QPushButton     = QtWidgets.QPushButton
+QHBoxLayout     = QtWidgets.QHBoxLayout
+QDateEdit       = QtWidgets.QDateEdit
+QTimeEdit       = QtWidgets.QTimeEdit
+QSizePolicy     = QtWidgets.QSizePolicy
+QWidget         = QtWidgets.QWidget
+QTextEdit       = QtWidgets.QTextEdit
+QLineEdit       = QtWidgets.QLineEdit
+AlignmentFlag   = Qt.AlignmentFlag
 ScrollBarPolicy = Qt.ScrollBarPolicy
-QSizePolicy = QSizePolicy.Policy
-EventType = QEvent.Type
+QSizePolicy     = QSizePolicy.Policy
+EventType       = QEvent.Type
 
 
 class ListWidget(QWidget):

@@ -1,13 +1,13 @@
-from PyQt6.QtWidgets import QDialog, QMainWindow  # , QApplication, QMessageBox
 from PyQt6 import QtWidgets, QtGui, QtCore
-from PyQt6.QtCore import Qt
 import datetime
 
-ConnectionType = Qt.ConnectionType
-
-WindowModality = Qt.WindowModality
-WindowType = Qt.WindowType
-Slot = QtCore.pyqtSlot
+Qt              = QtCore.Qt
+QMainWindow     = QtWidgets.QMainWindow
+QDialog         = QtWidgets.QDialog
+ConnectionType  = Qt.ConnectionType
+WindowModality  = Qt.WindowModality
+WindowType      = Qt.WindowType
+Slot            = QtCore.pyqtSlot
 
 opened_windowes = dict()
 
