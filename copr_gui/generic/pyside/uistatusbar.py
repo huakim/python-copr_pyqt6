@@ -10,7 +10,10 @@ QDialog         = QtWidgets.QDialog
 ConnectionType  = Qt.ConnectionType
 WindowModality  = Qt.WindowModality
 WindowType      = Qt.WindowType
-Slot            = QtCore.pyqtSlot
+try:
+    Slot            = QtCore.pyqtSlot
+except AttributeError:
+    Slot            = QtCore.Slot
 
 opened_windowes = dict()
 
