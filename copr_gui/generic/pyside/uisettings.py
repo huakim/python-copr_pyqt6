@@ -1,5 +1,7 @@
-from PyQt6 import QtWidgets, QtCore
-# from PyQt6.QtGui import QFontMetrics
+try:
+    from PyQt6 import QtWidgets, QtCore
+except ImportError:
+    from PySide6 import QtWidgets, QtCore
 
 QDate           = QtCore.QDate
 Qt              = QtCore.Qt

@@ -1,7 +1,11 @@
 from .uistatusbar import WindowFrame
-from PyQt6 import QtWidgets, QtGui, QtCore
+
 # import datetime
 from copr_gui.static.spec_types import getName, getId, getType
+try:
+    from PyQt6 import QtWidgets, QtGui, QtCore
+except ImportError:
+    from PySide6 import QtWidgets, QtGui, QtCore
 
 QVBoxLayout = QtWidgets.QVBoxLayout
 QHBoxLayout = QtWidgets.QHBoxLayout
