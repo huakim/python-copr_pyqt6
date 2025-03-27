@@ -1,4 +1,4 @@
-name='pyqt6'
+name='pyside'
 url='https://github.com/huakim/python-copr_pyqt6'
 script='copr-qt'
 requires=[]
