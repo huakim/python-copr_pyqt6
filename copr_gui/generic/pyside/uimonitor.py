@@ -78,6 +78,7 @@ class TableModel(QAbstractTableModel):
     def __init__(self, columns, data=None):
         super().__init__()
         self.__data = dict()
+        self.__last_sort = None
         self.columns = [{"id": "check_state", "name": "", "type": "bool"}] + columns
         #  self.column_names = [''] + [getName(i) for i in column_names]
         #  self.types = ['bool'] + [getType(i, 'str') for i in column_names]
@@ -153,15 +154,23 @@ class TableModel(QAbstractTableModel):
         for i in row_data:
             self.appendRow(i)
 
-    def SortByColumn(self, col):
+    def RestoreLastSort(self):
         self.sort(
-            col,
+            self.sort_col,
             (
                 SortOrder.DescendingOrder
                 if not self.sort_reverse
                 else SortOrder.AscendingOrder
-            ),
+            )
         )
+
+    def SortByColumn(self, col):
+        if self.sort_col == col:
+            self.sort_reverse = not self.sort_reverse
+        else:
+            self.sort_col = col
+            self.sort_reverse = False
+        self.RestoreLastSort()
 
     def rowCount(self, parent=None):
         return len(self.__rows)
@@ -220,10 +229,9 @@ class TableModel(QAbstractTableModel):
         return flags
 
     def sort(self, column, order=SortOrder.AscendingOrder):
-        self.sort_col = column
-        self.sort_reverse = order == SortOrder.DescendingOrder
+        sort_reverse = order == SortOrder.DescendingOrder
 
-        self.__rows.sort(key=lambda x: x[column], reverse=self.sort_reverse)
+        self.__rows.sort(key=lambda x: x[column], reverse=sort_reverse)
         self.layoutChanged.emit()
 
     def appendRow(self, row_data):
