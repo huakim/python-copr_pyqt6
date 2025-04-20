@@ -63,10 +63,8 @@ class TableModel(QAbstractTableModel):
         elif name == "column_ids":
             func = getId
         elif name == "column_types":
-
             def func(item, default="str"):
                 return getType(item, default)
-
         else:
             raise AttributeError(name)
         try:
@@ -78,7 +76,6 @@ class TableModel(QAbstractTableModel):
     def __init__(self, columns, data=None):
         super().__init__()
         self.__data = dict()
-        self.__last_sort = None
         self.columns = [{"id": "check_state", "name": "", "type": "bool"}] + columns
         #  self.column_names = [''] + [getName(i) for i in column_names]
         #  self.types = ['bool'] + [getType(i, 'str') for i in column_names]
@@ -231,8 +228,9 @@ class TableModel(QAbstractTableModel):
     def sort(self, column, order=SortOrder.AscendingOrder):
         sort_reverse = order == SortOrder.DescendingOrder
 
-        self.__rows.sort(key=lambda x: x[column], reverse=sort_reverse)
-        self.layoutChanged.emit()
+        if column is None:
+            self.__rows.sort(key=lambda x: x[column], reverse=sort_reverse)
+            self.layoutChanged.emit()
 
     def appendRow(self, row_data):
         self.beginInsertRows(
