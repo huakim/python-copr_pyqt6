@@ -225,12 +225,11 @@ class TableModel(QAbstractTableModel):
 
         return flags
 
-    def sort(self, column, order=SortOrder.AscendingOrder):
-        sort_reverse = order == SortOrder.DescendingOrder
-
+    def sort(self, column, sort_reverse):
         if column is None:
-            self.__rows.sort(key=lambda x: x[column], reverse=sort_reverse)
-            self.layoutChanged.emit()
+            return
+        self.__rows.sort(key=lambda x: x[column], reverse=sort_reverse)
+        self.layoutChanged.emit()
 
     def appendRow(self, row_data):
         self.beginInsertRows(
