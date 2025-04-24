@@ -152,14 +152,12 @@ class TableModel(QAbstractTableModel):
             self.appendRow(i)
 
     def RestoreLastSort(self):
-        self.sort(
-            self.sort_col,
-            (
-                SortOrder.DescendingOrder
-                if not self.sort_reverse
-                else SortOrder.AscendingOrder
-            )
-        )
+        column = self.sort_col
+        sort_reverse = self.sort_reverse
+        if column is None:
+            return
+        self.__rows.sort(key=lambda x: x[column], reverse=sort_reverse)
+        self.layoutChanged.emit()
 
     def SortByColumn(self, col):
         if self.sort_col == col:
@@ -224,12 +222,6 @@ class TableModel(QAbstractTableModel):
             flags |= ItemFlag.ItemIsUserCheckable
 
         return flags
-
-    def sort(self, column, sort_reverse):
-        if column is None:
-            return
-        self.__rows.sort(key=lambda x: x[column], reverse=sort_reverse)
-        self.layoutChanged.emit()
 
     def appendRow(self, row_data):
         self.beginInsertRows(
